@@ -1,0 +1,22 @@
+{
+    "fumo": [
+        {
+            "title": "Fumo!",
+            "description": "A cute fumo character.",
+            "file_name": "fumo_jar_01.jpg",
+            "url": ""
+        },
+        {
+            "title": "Fumo!",
+            "description": "A cute fumo character.",
+            "file_name": "fumo_jar_02.jpg",
+            "url": ""
+        },
+        {
+            "title": "Fumo!",
+            "description": "A cute fumo character.",
+            "file_name": "fumo_smoke_01.gif",
+            "url": ""
+        }
+    ]
+}

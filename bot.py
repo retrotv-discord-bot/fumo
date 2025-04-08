@@ -1,7 +1,9 @@
 import discord
 from discord.ext import commands
+
 import random
 import os
+import json
 from dotenv import load_dotenv
 
 # .env 파일에서 토큰 로드
@@ -13,6 +15,19 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+# 이미지 정보 로드
+def __load_image_data():
+    try:
+        with open('images.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data.get('fumo', [])
+    except FileNotFoundError:
+        print("images.json 파일을 찾을 수 없습니다.")
+        return []
+    except json.JSONDecodeError:
+        print("images.json 파일 형식이 올바르지 않습니다.")
+        return []
+
 @bot.event
 async def on_ready():
     print(f'{bot.user} 봇이 시작되었습니다!')
@@ -20,29 +35,55 @@ async def on_ready():
 @bot.command(name='후모')
 async def fumo(ctx):
     
-    # images 디렉토리에서 모든 이미지 파일 목록 가져오기
-    image_files = [f for f in os.listdir('images') if f.endswith(('.png', '.jpg', '.jpeg', '.gif'))]
+    # 이미지 데이터 로드
+    image_data = __load_image_data()
+    print(f'총 {len(image_data)}개의 이미지 정보가 로드되었습니다.')
     
-    if not image_files:
-        await ctx.send('이미지가 없습니다! images 폴더에 이미지를 추가해주세요.')
+    if not image_data:
+        embed = discord.Embed(
+            title='후모! 이미지가 없어요!',
+            color=discord.Color.purple()
+        )
+        
+        await ctx.send(embed=embed)
         return
     
     # 랜덤으로 이미지 선택
-    random_image = random.choice(image_files)
-    
-    # 이미지 파일 경로 생성
-    image_path = os.path.join('images', random_image)
-    file = discord.File(image_path, filename=random_image)
+    image_info = random.choice(image_data)
     
     # 임베드 생성
     embed = discord.Embed(
-        title="후모 이미지",
-        description="랜덤으로 선택된 후모 이미지입니다!",
-        color=discord.Color.blue()
+        title=image_info['title'],
+        description=image_info['description'],
+        color=discord.Color.purple()
     )
     
-    embed.set_image(url=f"attachment://{random_image}")
-    await ctx.send(embed=embed, file=file)
+    # 이미지 파일 경로가 있는 경우
+    file_name = image_info.get('file_name')
+    url = image_info.get('url')
+    
+    if file_name:
+        image_path = os.path.join('images', file_name)
+        if os.path.exists(image_path):
+            with open(image_path, 'rb') as f:
+                file = discord.File(f, filename=file_name)
+                embed.set_image(url=f"attachment://{file_name}")
+                await ctx.send(embed=embed, file=file)
+                return
+    
+    # URL이 있는 경우
+    elif url:
+        embed.set_image(url=url)
+        await ctx.send(embed=embed)
+        return
+    
+    # 파일 경로와 URL이 모두 없는 경우
+    embed = discord.Embed(
+            title='후모! 이미지가 없어요!',
+            color=discord.Color.purple()
+        )
+        
+    await ctx.send(embed=embed)
 
 # 봇 실행
 bot.run(TOKEN)
