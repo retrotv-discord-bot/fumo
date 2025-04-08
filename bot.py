@@ -25,4 +25,4 @@ async def coin(ctx):
     await ctx.send(f'동전을 던진 결과: {result}')
 
 # 봇 실행
-bot.run(TOKEN) 
+bot.run(TOKEN)
