@@ -83,6 +83,12 @@
             "description": "A cute fumo character.",
             "file_name": "fumo_shotgun_01.gif",
             "url": ""
+        },
+		{
+            "title": "꼭두각시 서커스",
+            "description": "날 속인거니?",
+            "file_name": "fumo_kkokdu_01.jpg",
+            "url": ""
         }
     ]
 }
