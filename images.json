@@ -51,7 +51,7 @@
         {
             "title": "Fumo!",
             "description": "A cute fumo character.",
-            "file_name": "fumo_hamburger.gif",
+            "file_name": "fumo_hamburger_01.gif",
             "url": ""
         },
         {
@@ -73,9 +73,9 @@
             "url": ""
         },
         {
-            "title": "Fumo!",
-            "description": "A cute fumo character.",
-            "file_name": "fumo_pyro.gif",
+            "title": "후...모?",
+            "description": "무아아아아아아아앙!",
+            "file_name": "fumo_pyro_01.gif",
             "url": ""
         },
         {
@@ -185,6 +185,12 @@
             "description": "A cute fumo character.",
             "file_name": "",
             "url": "https://media1.tenor.com/m/nfL3yIL3AKUAAAAd/maribel-hearn-maribel.gif"
+        },
+		{
+            "title": "날 속인거니?",
+            "description": "꼭두각시 서커스 재밌다며",
+            "file_name": "fumo_kkokdu_01.jpg",
+            "url": ""
         }
     ]
 }
