@@ -65,6 +65,7 @@ async def fumo(ctx):
     url = image_info.get("url")
 
     if file_name:
+        print("file: " + file_name)
         image_path = os.path.join("images", file_name)
         if os.path.exists(image_path):
             with open(image_path, "rb") as f:
@@ -76,6 +77,7 @@ async def fumo(ctx):
 
     # 이미지 URL이 있는 경우
     elif url:
+        print("url: " + url)
         embed.set_image(url=url)
         await ctx.send(embed=embed)
 
