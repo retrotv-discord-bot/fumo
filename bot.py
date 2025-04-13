@@ -28,14 +28,14 @@ def __load_fumo_image_data():
     except json.JSONDecodeError:
         print("images.json 파일 형식이 올바르지 않습니다.")
         return []
-    
+
 
 # 이미지 정보 로드
 def __load_homo_image_data():
     try:
         with open("images.json", "r", encoding="utf-8") as f:
             data = json.load(f)
-            return data.get("fumo", [])
+            return data.get("homo", [])
     except FileNotFoundError:
         print("images.json 파일을 찾을 수 없습니다.")
         return []
@@ -107,7 +107,7 @@ async def fumo(ctx):
 async def homo(ctx):
 
     # 이미지 데이터 로드
-    image_data = __load_image_data()
+    image_data = __load_homo_image_data()
     print(f"총 {len(image_data)}개의 이미지 정보가 로드되었습니다.")
 
     if not image_data:
