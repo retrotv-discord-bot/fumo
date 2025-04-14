@@ -146,8 +146,7 @@ async def homo(ctx):
     # 이미지 URL이 있는 경우
     elif url:
         print("url: " + url)
-        spoiler_url = f"||{url}||"
-        embed.set_image(url=spoiler_url)
+        embed.set_image(url=url)
         await ctx.send(embed=embed)
 
         return
