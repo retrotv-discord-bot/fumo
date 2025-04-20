@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
+<<<<<<< HEAD
     <list default="true" id="5641a8a4-bb77-41bb-aac2-ddda006cb07e" name="변경" comment="" />
+=======
+    <list default="true" id="5641a8a4-bb77-41bb-aac2-ddda006cb07e" name="변경" comment="">
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    </list>
+>>>>>>> 03128520820e12693fbc17b86e63e6f0540c6d07
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
