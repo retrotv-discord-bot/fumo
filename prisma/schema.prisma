@@ -14,6 +14,7 @@ datasource db {
 }
 
 model FUMO {
+  id          Int     @id @default(autoincrement())
   TITLE       String @default("Fumo!")
   DESCRIPTION String @default("A cute fumo character.")
   FILENAME    String
