@@ -13,10 +13,10 @@ datasource db {
   url      = "file:./fumo.db"
 }
 
-model FUMO {
-  id          Int     @id @default(autoincrement())
+model Fumo {
+  ID          Int    @id @default(autoincrement())
   TITLE       String @default("Fumo!")
   DESCRIPTION String @default("A cute fumo character.")
-  FILENAME    String
-  URL         String
+  FILENAME    String @default("")
+  URL         String @default("")
 }
