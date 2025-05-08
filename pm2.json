@@ -4,6 +4,7 @@
       "name": "Discord Bot",
       "script": "index.ts",
       "interpreter": "./node_modules/.bin/ts-node",
+      "exec_mode": "fork",
       "instances": "1",
       "watch": [ "src", "index.ts" ],
       "auto_restart": true,
