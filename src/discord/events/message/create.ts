@@ -14,8 +14,6 @@ export default new Event({
             return;
         }
 
-        console.log(message.content);
-
         if (!client.application?.owner) {
             await client.application?.fetch();
         }

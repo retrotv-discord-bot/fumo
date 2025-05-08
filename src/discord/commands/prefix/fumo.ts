@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { EmbedBuilder, Message, TextChannel } from "discord.js";
 import PrefixCommand from "../../../templates/prefix-command";
 
 export default new PrefixCommand({
@@ -6,6 +6,15 @@ export default new PrefixCommand({
     description: "Ping the bot to check if it's alive",
     aliases: ["후모", "푸모"],
     async execute(message: Message) {
-        await message.reply("pong");
+        const embed = new EmbedBuilder()
+            .setColor("#9b59b6")
+            .setTitle("Fumo!")
+            .setDescription("Fumo!");
+            // .setImage("")
+
+        const textChannel = message.channel as TextChannel;
+        await textChannel.send({
+            embeds: [embed]
+        })
     },
 });
