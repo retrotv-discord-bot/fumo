@@ -51,4 +51,16 @@ export default class FumoService {
 
         return fumo;
     }
+
+    public async getRandomFumo(): Promise<Fumo | null> {
+        const fumos = await this.client.fumo.findMany({
+            orderBy: {
+                ID: "asc",
+            }
+        });
+        const randomIndex = Math.floor(Math.random() * fumos.length);
+        const randomFumo = fumos[randomIndex];
+        
+        return randomFumo;
+    }
 }
