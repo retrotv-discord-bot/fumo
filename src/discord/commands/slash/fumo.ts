@@ -79,8 +79,12 @@ export default new SlashCommand({
             return;
         }
 
-        const choices = await fumoService.getFumoTitles(focusedOption.value);
+        if (focusedOption.value.length < 2) {
+            await interaction.respond([]);
+            return;
+        }
 
+        const choices = await fumoService.getFumoTitles(focusedOption.value);
         if (choices === null) {
             await interaction.respond([]);
             return;
