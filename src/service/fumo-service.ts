@@ -40,7 +40,7 @@ export default class FumoService {
         return fumo;
     }
 
-    public async getFumoTitles(title: string): Promise<Fumo[] | null> {
+    public async getFumoTitles(title: string): Promise<string[] | null> {
         const fumos = await this.client.fumo.findMany({
             where: {
                 TITLE: {
@@ -49,7 +49,14 @@ export default class FumoService {
             },
         });
 
-        return fumos;
+        if (fumos.length === 0) {
+            return null;
+        }
+
+        const fumoTitles = fumos.map((fumo) => fumo.TITLE);
+        const uniqueFumoTitles = Array.from(new Set(fumoTitles));
+
+        return uniqueFumoTitles;
     }
 
     public async getRandomFumo(): Promise<Fumo | null> {

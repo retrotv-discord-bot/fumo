@@ -1,5 +1,6 @@
-import { AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { AttachmentBuilder, AutocompleteInteraction, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import SlashCommand from "../../../templates/slash-command";
+import FumoService from "../../../service/fumo-service";
 
 export default new SlashCommand({
     data: new SlashCommandBuilder()
@@ -30,20 +31,61 @@ export default new SlashCommand({
             return;
         }
 
-        if (interaction.commandName === "fumo") {
-            if (interaction.options.getBoolean("title", false)) {
-                await interaction.reply("Fumo!");
-                return;
-            }
+        const fumoService = new FumoService();
 
-            await interaction.reply("Fumo!");
-            return;
+        if (interaction.commandName === "fumo") {
+            if (interaction.options.getString("title", false)) {
+                const title = interaction.options.getString("title", false);
+                const fumo = title === null ? null : await fumoService.getFumoByTitle(title);
+
+                if (fumo === null) {
+                    await interaction.reply("후모가 없어요!");
+                    return;
+                }
+
+                const embed = new EmbedBuilder()
+                    .setColor("#9b59b6")
+                    .setTitle(fumo.TITLE)
+                    .setDescription(fumo.DESCRIPTION);
+        
+                if (fumo.URL !== "") {
+                    embed.setImage(fumo.URL);
+                    await interaction.reply({
+                        embeds: [embed]
+                    });
+        
+                    return;
+                }
+        
+                if (fumo.FILENAME !== "") {
+                    const file = new AttachmentBuilder(fumo.FILENAME);
+                    embed.setImage(`attachment://${fumo.FILENAME}`);
+                    await interaction.reply({
+                        embeds: [embed],
+                        files: [file]
+                    });
+        
+                    return;
+                }
+            }
         }
     },
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const fumoService = new FumoService();
+
         const focusedOption = interaction.options.getFocused(true);
-        const choices = ["Fumo", "Fumo2", "Fumo3"];
+        if (focusedOption.name !== "title") {
+            return;
+        }
+
+        const choices = await fumoService.getFumoTitles(focusedOption.value);
+
+        if (choices === null) {
+            await interaction.respond([]);
+            return;
+        }
+
         const filtered = choices.filter((choice) =>
             choice.toLowerCase().includes(focusedOption.value.toLowerCase())
         );
