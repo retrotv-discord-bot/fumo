@@ -53,13 +53,15 @@ export default class FumoService {
     }
 
     public async getRandomFumo(): Promise<Fumo | null> {
-        const fumos = await this.client.fumo.findMany({
-            orderBy: {
-                ID: "asc",
-            }
+        const count = await this.client.fumo.count();
+        if (count === 0) {
+            return null;
+        }
+        
+        const randomSkip = Math.floor(Math.random() * count);
+        const randomFumo = await this.client.fumo.findFirst({
+            skip: randomSkip,
         });
-        const randomIndex = Math.floor(Math.random() * fumos.length);
-        const randomFumo = fumos[randomIndex];
         
         return randomFumo;
     }
