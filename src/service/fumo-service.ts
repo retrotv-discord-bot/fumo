@@ -41,7 +41,7 @@ export default class FumoService {
     }
 
     public async getFumoTitles(title: string): Promise<Fumo[] | null> {
-        const fumo = await this.client.fumo.findMany({
+        const fumos = await this.client.fumo.findMany({
             where: {
                 TITLE: {
                     contains: title,
@@ -49,7 +49,7 @@ export default class FumoService {
             },
         });
 
-        return fumo;
+        return fumos;
     }
 
     public async getRandomFumo(): Promise<Fumo | null> {
