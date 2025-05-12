@@ -1,6 +1,12 @@
-import { AttachmentBuilder, AutocompleteInteraction, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import {
+    AttachmentBuilder,
+    AutocompleteInteraction,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    SlashCommandBuilder,
+} from "discord.js";
 import SlashCommand from "../../../templates/slash-command";
-import FumoService from "../../../service/fumo-service";
+import FumoService from "../../../services/fumo-service";
 
 export default new SlashCommand({
     data: new SlashCommandBuilder()
@@ -12,7 +18,7 @@ export default new SlashCommand({
         .setDescriptionLocalizations({
             ko: "귀여운 후모 사진을 보여줍니다!",
         })
-        .addStringOption((option) => 
+        .addStringOption((option) =>
             option
                 .setName("title")
                 .setNameLocalizations({
@@ -23,7 +29,7 @@ export default new SlashCommand({
                     ko: "제목으로 후모 사진을 검색합니다.",
                 })
                 .setRequired(false)
-                .setAutocomplete(true)
+                .setAutocomplete(true),
         ),
 
     async execute(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -47,24 +53,24 @@ export default new SlashCommand({
                     .setColor("#9b59b6")
                     .setTitle(fumo.TITLE)
                     .setDescription(fumo.DESCRIPTION);
-        
+
                 if (fumo.URL !== "") {
                     embed.setImage(fumo.URL);
                     await interaction.reply({
-                        embeds: [embed]
+                        embeds: [embed],
                     });
-        
+
                     return;
                 }
-        
+
                 if (fumo.FILENAME !== "") {
                     const file = new AttachmentBuilder(fumo.FILENAME);
                     embed.setImage(`attachment://${fumo.FILENAME}`);
                     await interaction.reply({
                         embeds: [embed],
-                        files: [file]
+                        files: [file],
                     });
-        
+
                     return;
                 }
             }
@@ -90,14 +96,12 @@ export default new SlashCommand({
             return;
         }
 
-        const filtered = choices.filter((choice) =>
-            choice.toLowerCase().includes(focusedOption.value.toLowerCase())
-        );
+        const filtered = choices.filter((choice) => choice.toLowerCase().includes(focusedOption.value.toLowerCase()));
         await interaction.respond(
             filtered.map((choice) => ({
                 name: choice,
                 value: choice,
-            }))
+            })),
         );
     },
 });
