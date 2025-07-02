@@ -103,6 +103,7 @@ export default class FumoService {
         const json = (await response.json()) as any;
 
         try {
+            console.log(json);
             const uploadedUrl = json["files"][0]["url"];
             await this.saveFumo(title, descript, "", uploadedUrl);
         } catch (error) {
