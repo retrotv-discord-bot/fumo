@@ -23,6 +23,8 @@ export default class FumoService {
     }
 
     public async saveFumo(title?: string, description?: string, filename?: string, url?: string): Promise<void> {
+        description = description ?? "A cute fumo character.";
+
         await this.client.fumo.create({
             data: {
                 ID: undefined,

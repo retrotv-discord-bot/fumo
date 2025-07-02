@@ -6,7 +6,7 @@
       "interpreter": "./node_modules/.bin/ts-node",
       "instances": "1",
       "watch": [ "src", "index.ts" ],
-      "auto_restart": true,
+      "auto_restart": false,
       "ignore_watch": [ "node_modules", "download", "prisma" ]
     }
   ]
