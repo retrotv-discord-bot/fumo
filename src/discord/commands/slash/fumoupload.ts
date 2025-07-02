@@ -14,7 +14,7 @@ export default new SlashCommand({
         })
         .addStringOption((option) =>
             option
-                .setName("Title")
+                .setName("title")
                 .setNameLocalizations({
                     ko: "제목",
                 })
@@ -27,22 +27,20 @@ export default new SlashCommand({
         )
         .addStringOption((option) =>
             option
-                .setName("URL")
+                .setName("url")
                 .setNameLocalizations({
-                    ko: "URL",
+                    ko: "url",
                 })
-                .setDescription(
-                    "The URL of the fumo photo. Please enter a URL that includes the file extension of the image. (EX: https://example.com/fumo.jpg)",
-                )
+                .setDescription("The URL of the fumo photo. The file extension must be included.")
                 .setDescriptionLocalizations({
-                    ko: "후모 사진의 URL입니다. 이미지의 확장자 명까지 존재하는 URL을 입력해주세요. (EX: https://example.com/fumo.jpg)",
+                    ko: "후모 사진의 URL입니다. 파일의 확장자 명이 포함되어야 합니다.",
                 })
                 .setRequired(true)
                 .setAutocomplete(false),
         )
         .addStringOption((option) =>
             option
-                .setName("Descript")
+                .setName("descript")
                 .setNameLocalizations({
                     ko: "설명",
                 })
@@ -63,7 +61,7 @@ export default new SlashCommand({
 
         if (interaction.commandName === "fumoupload") {
             const title = interaction.options.getString("title", false);
-            const url = interaction.options.getString("URL", false);
+            const url = interaction.options.getString("url", false);
             const descript = interaction.options.getString("descript", false);
 
             if (title === null || url === null) {

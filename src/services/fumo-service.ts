@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import prisma from "../config/datasource";
-import got from "got";
+import ky from "ky";
 
 import { config } from "../../config";
 
@@ -78,16 +78,23 @@ export default class FumoService {
 
     public async uploadFumo(title: string, fileUrl: string, descript: string | null): Promise<void> {
         descript = descript ?? "";
-        const response = await got
-            .post("https://file.retrotv.me/api/upload", {
-                headers: {
-                    authorization: config.BOT_TOKEN,
-                },
+
+        const api = ky.create({
+            prefixUrl: "https://file.retrotv.me", // 기본 URL 설정
+            timeout: 5000, // 타임아웃 설정
+            headers: {
+                // 기본 헤더 설정
+                Authorization: config.BOT_TOKEN,
+            },
+        });
+
+        const response = (await api
+            .post("api/upload", {
                 json: {
                     files: [fileUrl],
                 },
             })
-            .json();
+            .json()) as any;
 
         try {
             const uploadedUrl = response["files"][0]["url"];
