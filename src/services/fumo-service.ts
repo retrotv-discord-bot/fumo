@@ -1,5 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import prisma from "../config/datasource";
+import FormData from "form-data";
+import fs from "fs/promises";
+import fetch from "node-fetch";
 import ky from "ky";
 
 import { config } from "../../config";
@@ -77,31 +80,39 @@ export default class FumoService {
     }
 
     public async uploadFumo(title: string, fileUrl: string, descript: string | null): Promise<void> {
+        const tempPath = "./temp-image.png";
+        this.fileDownload(fileUrl, tempPath);
+
         descript = descript ?? "";
 
-        const api = ky.create({
-            prefixUrl: "https://file.retrotv.me", // 기본 URL 설정
-            timeout: 5000, // 타임아웃 설정
+        const form = new FormData();
+        form.append("file", fs.readFile(tempPath));
+
+        const response = await fetch("https://file.retrotv.me/api/upload", {
+            method: "POST",
             headers: {
-                Authorization: config.FILE_API_KEY,
+                Authorization: config.FILE_API_KEY!,
                 "Content-Type": "multipart/form-data",
+                ...form.getHeaders(),
             },
+            body: form,
         });
 
-        const response = (await api
-            .post("api/upload", {
-                json: {
-                    files: [fileUrl],
-                },
-            })
-            .json()) as any;
+        const json = (await response.json()) as any;
 
         try {
-            const uploadedUrl = response["files"][0]["url"];
+            const uploadedUrl = json["files"][0]["url"];
             await this.saveFumo(title, descript, "", uploadedUrl);
         } catch (error) {
             console.error("Error uploading fumo:", error);
             throw new Error("Failed to upload fumo. Please check the file URL and try again.");
         }
+    }
+
+    private async fileDownload(fileUrl: string, fileName: string): Promise<void> {
+        const tempPath = fileName;
+        const response = await ky.get(fileUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        await fs.writeFile(tempPath, Buffer.from(arrayBuffer));
     }
 }

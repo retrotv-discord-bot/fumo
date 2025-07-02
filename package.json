@@ -20,7 +20,9 @@
     "@prisma/client": "^6.7.0",
     "discord.js": "^14.19.2",
     "dotenv": "^16.5.0",
+    "form-data": "^4.0.3",
     "ky": "^1.8.1",
+    "node-fetch": "^3.3.2",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
