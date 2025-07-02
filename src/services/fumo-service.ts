@@ -111,8 +111,15 @@ export default class FumoService {
 
     private async fileDownload(fileUrl: string, fileName: string): Promise<void> {
         const tempPath = fileName;
-        const response = await ky.get(fileUrl);
-        const arrayBuffer = await response.arrayBuffer();
-        await fs.writeFile(tempPath, Buffer.from(arrayBuffer));
+        try {
+            const response = await ky.get(fileUrl);
+            if (!response.ok) {
+                throw new Error(`Failed to download file: ${response.statusText}`);
+            }
+            const arrayBuffer = await response.arrayBuffer();
+            await fs.writeFile(tempPath, Buffer.from(arrayBuffer));
+        } catch (error) {
+            console.error("Error downloading file:", error);
+        }
     }
 }
