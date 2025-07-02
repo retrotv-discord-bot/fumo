@@ -80,7 +80,7 @@ export default class FumoService {
     }
 
     public async uploadFumo(title: string, fileUrl: string, descript: string | null): Promise<void> {
-        const fileName = this.getCurrentTimeFormatted() + this.getFileExtension(fileUrl);
+        const fileName = this.getCurrentTimeFormatted(); // + this.getFileExtension(fileUrl);
         const tempPath = `/home/docker/Downloads/${fileName}`;
         await this.fileDownload(fileUrl, tempPath);
 
