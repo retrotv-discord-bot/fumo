@@ -73,9 +73,8 @@ export default new SlashCommand({
                 await fumoService.uploadFumo(title, url, descript);
                 await interaction.reply({ content: "후모 사진 업로드에 성공했습니다!", ephemeral: true });
                 return;
-            } catch (e) {
-                console.error(e);
-                await interaction.reply({ content: "후모 사진 업로드 중 오류가 발생했습니다!", ephemeral: true });
+            } catch (e: any) {
+                await interaction.reply({ content: e.message, ephemeral: true });
                 return;
             }
         }

@@ -80,6 +80,18 @@ export default class FumoService {
     }
 
     public async uploadFumo(title: string, fileUrl: string, descript: string | null): Promise<void> {
+        const fumo = await this.client.fumo.findFirst({
+            where: {
+                TITLE: {
+                    equals: title,
+                },
+            },
+        });
+
+        if (fumo) {
+            throw new Error("해당하는 제목은 이미 존재합니다. 다른 제목을 사용해주세요.");
+        }
+
         const fileName = this.getCurrentTimeFormatted() + this.getFileExtension(fileUrl);
         const tempPath = `/home/docker/Downloads/${fileName}`;
         await this.fileDownload(fileUrl, tempPath);
@@ -92,7 +104,6 @@ export default class FumoService {
             method: "POST",
             headers: {
                 Authorization: config.FILE_API_KEY!,
-                // ...form.getHeaders(),
             },
             body: form,
         });
@@ -105,7 +116,7 @@ export default class FumoService {
             await this.saveFumo(title, descript, "", uploadedUrl);
         } catch (error) {
             console.error("Error uploading fumo:", error);
-            throw new Error("Failed to upload fumo. Please check the file URL and try again.");
+            throw new Error("후모 이미지 정보를 저장하는 중 오류가 발생했습니다.");
         }
     }
 
