@@ -92,7 +92,7 @@ export default class FumoService {
         const response = (await api
             .post("api/upload", {
                 json: {
-                    files: [fileUrl],
+                    files: JSON.stringify([fileUrl]),
                 },
             })
             .json()) as any;
