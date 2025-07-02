@@ -22,9 +22,7 @@ export default class FumoService {
         this.client = prisma;
     }
 
-    public async saveFumo(title?: string, description?: string, filename?: string, url?: string): Promise<void> {
-        description = description ?? "A cute fumo character.";
-
+    public async saveFumo(title: string, description: string, filename?: string, url?: string): Promise<void> {
         await this.client.fumo.create({
             data: {
                 ID: undefined,
@@ -86,8 +84,6 @@ export default class FumoService {
         const tempPath = `/home/docker/Downloads/${fileName}`;
         await this.fileDownload(fileUrl, tempPath);
 
-        descript = descript ?? "";
-
         const form = new FormData();
         const fileBuffer = await fs.readFile(tempPath);
         form.append("file", fileBuffer, { filename: fileName });
@@ -104,8 +100,8 @@ export default class FumoService {
         const json = (await response.json()) as any;
 
         try {
-            console.log(json);
             const uploadedUrl = json["files"][0]["url"];
+            descript = descript ?? "A cute fumo character.";
             await this.saveFumo(title, descript, "", uploadedUrl);
         } catch (error) {
             console.error("Error uploading fumo:", error);
