@@ -83,6 +83,7 @@ export default class FumoService {
             prefixUrl: "https://file.retrotv.me", // 기본 URL 설정
             timeout: 5000, // 타임아웃 설정
             headers: {
+                "Content-Type": "application/json",
                 Authorization: config.FILE_API_KEY,
             },
         });
@@ -90,7 +91,7 @@ export default class FumoService {
         const response = (await api
             .post("api/upload", {
                 json: {
-                    files: JSON.stringify([fileUrl]),
+                    files: [fileUrl],
                 },
             })
             .json()) as any;
