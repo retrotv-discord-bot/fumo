@@ -84,15 +84,13 @@ export default class FumoService {
             timeout: 5000, // 타임아웃 설정
             headers: {
                 Authorization: config.FILE_API_KEY,
-                Accept: "application/json",
-                "Content-Type": "application/json",
             },
         });
 
         const response = (await api
             .post("api/upload", {
                 json: {
-                    files: [JSON.stringify(fileUrl)],
+                    files: [fileUrl],
                 },
             })
             .json()) as any;
