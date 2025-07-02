@@ -84,7 +84,7 @@ export default class FumoService {
             timeout: 5000, // 타임아웃 설정
             headers: {
                 // 기본 헤더 설정
-                Authorization: config.BOT_TOKEN,
+                Authorization: config.FILE_API_KEY,
             },
         });
 
