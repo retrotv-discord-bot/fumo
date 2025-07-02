@@ -87,7 +87,8 @@ export default class FumoService {
         descript = descript ?? "";
 
         const form = new FormData();
-        form.append("file", fs.readFile(tempPath));
+        const fileBuffer = await fs.readFile(tempPath);
+        form.append("file", fileBuffer, { filename: fileName });
 
         const response = await fetch("https://file.retrotv.me/api/upload", {
             method: "POST",
