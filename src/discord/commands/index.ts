@@ -2,6 +2,7 @@ import ContextMenuCommand from "../../templates/context-menu-command";
 import PrefixCommand from "../../templates/prefix-command";
 import SlashCommand from "../../templates/slash-command";
 import fumoSlash from "./slash/fumo";
+import fumouploadSlash from "./slash/fumoupload";
 import fumoPrefix from "./prefix/fumo";
 
 /*
@@ -9,5 +10,5 @@ import fumoPrefix from "./prefix/fumo";
  * Declare the context menu, slash commands, and prefix commands to be used. The declared commands are called in index.ts.
  */
 export const contextMenuCommands: ContextMenuCommand[] = [];
-export const slashCommands: SlashCommand[] = [fumoSlash];
+export const slashCommands: SlashCommand[] = [fumoSlash, fumouploadSlash];
 export const prefixCommands: PrefixCommand[] = [fumoPrefix];

@@ -1,5 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import prisma from "../config/datasource";
+import got from "got";
+
+import { config } from "../../config";
 
 interface Fumo {
     ID: number;
@@ -33,7 +36,7 @@ export default class FumoService {
             where: {
                 TITLE: {
                     contains: title,
-                }
+                },
             },
         });
 
@@ -45,7 +48,7 @@ export default class FumoService {
             where: {
                 TITLE: {
                     contains: title,
-                }
+                },
             },
         });
 
@@ -64,12 +67,34 @@ export default class FumoService {
         if (count === 0) {
             return null;
         }
-        
+
         const randomSkip = Math.floor(Math.random() * count);
         const randomFumo = await this.client.fumo.findFirst({
             skip: randomSkip,
         });
-        
+
         return randomFumo;
+    }
+
+    public async uploadFumo(title: string, fileUrl: string, descript: string | null): Promise<void> {
+        descript = descript ?? "";
+        const response = await got
+            .post("https://file.retrotv.me/api/upload", {
+                headers: {
+                    authorization: config.BOT_TOKEN,
+                },
+                json: {
+                    files: [fileUrl],
+                },
+            })
+            .json();
+
+        try {
+            const uploadedUrl = response["files"][0]["url"];
+            await this.saveFumo(title, descript, "", uploadedUrl);
+        } catch (error) {
+            console.error("Error uploading fumo:", error);
+            throw new Error("Failed to upload fumo. Please check the file URL and try again.");
+        }
     }
 }

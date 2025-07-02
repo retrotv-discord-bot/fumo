@@ -20,7 +20,7 @@ export default new SlashCommand({
         })
         .addStringOption((option) =>
             option
-                .setName("title")
+                .setName("Title")
                 .setNameLocalizations({
                     ko: "제목",
                 })
