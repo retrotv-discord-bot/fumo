@@ -84,6 +84,7 @@ export default class FumoService {
             timeout: 5000, // 타임아웃 설정
             headers: {
                 Authorization: config.FILE_API_KEY,
+                "Content-Type": "multipart/form-data",
             },
         });
 
