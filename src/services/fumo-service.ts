@@ -80,7 +80,7 @@ export default class FumoService {
     }
 
     public async uploadFumo(title: string, fileUrl: string, descript: string | null): Promise<void> {
-        const fileName = this.getCurrentTimeFormatted();
+        const fileName = this.getCurrentTimeFormatted() + this.getFileExtension(fileUrl);
         const tempPath = `/home/docker/Downloads/${fileName}`;
         await this.fileDownload(fileUrl, tempPath);
 
@@ -137,5 +137,32 @@ export default class FumoService {
         const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
 
         return `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
+    }
+
+    private getFileExtension(fileUrl: string): string {
+        // URL 객체를 사용하여 경로를 추출
+        const url = new URL(fileUrl);
+        const filePath = url.pathname; // URL에서 경로를 가져옴
+
+        // 마지막 점(.) 이후의 문자열을 찾아 확장자 추출
+        const lastDotIndex = filePath.lastIndexOf(".");
+        let fileExtension = "";
+
+        if (lastDotIndex !== -1) {
+            // 확장자명과 그 뒤의 정보를 분리
+            const extensionPart = filePath.substring(lastDotIndex);
+            // 확장자명만 추출 (예: .jpg?size=large -> .jpg)
+            fileExtension = extensionPart.split(/[?&]/)[0]; // 쿼리 문자열 제거
+        }
+
+        if (!fileExtension) {
+            console.warn("No valid file extension found in the URL:", fileUrl);
+            // 필요에 따라 기본 확장자를 설정하거나 다른 처리를 할 수 있습니다.
+            // fileExtension = '.jpg'; // 기본 확장자 설정
+        } else {
+            console.log("File extension:", fileExtension); // 확장자 출력
+        }
+
+        return fileExtension;
     }
 }
