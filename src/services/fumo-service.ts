@@ -81,7 +81,7 @@ export default class FumoService {
 
     public async uploadFumo(title: string, fileUrl: string, descript: string | null): Promise<void> {
         const tempPath = "./temp-image.png";
-        this.fileDownload(fileUrl, tempPath);
+        await this.fileDownload(fileUrl, tempPath);
 
         descript = descript ?? "";
 
