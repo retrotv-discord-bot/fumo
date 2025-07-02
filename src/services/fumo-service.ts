@@ -94,8 +94,7 @@ export default class FumoService {
             method: "POST",
             headers: {
                 Authorization: config.FILE_API_KEY!,
-                "Content-Type": "multipart/form-data",
-                ...form.getHeaders(),
+                // ...form.getHeaders(),
             },
             body: form,
         });
