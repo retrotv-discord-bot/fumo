@@ -1,7 +1,7 @@
 import { Buffer } from "buffer";
 import { PrismaClient } from "@prisma/client";
 import { FormData } from "formdata-node";
-import fs, { writeFile } from "fs/promises";
+import { writeFile } from "fs/promises";
 import fetch, { BodyInit } from "node-fetch";
 import { fileFromPath } from "formdata-node/file-from-path";
 
@@ -80,7 +80,7 @@ export default class FumoService {
         return randomFumo;
     }
 
-    public async uploadFumo(title: string, fileUrl: string, descript: string | null): Promise<void> {
+    public async checkDuplicateFumo(title: string): Promise<boolean> {
         const fumo = await this.client.fumo.findFirst({
             where: {
                 TITLE: {
@@ -89,17 +89,26 @@ export default class FumoService {
             },
         });
 
-        if (fumo) {
+        return fumo !== null;
+    }
+
+    public async uploadFumo(title: string, fileUrl: string, descript: string | null): Promise<void> {
+        if (await this.checkDuplicateFumo(title)) {
             throw new Error("해당하는 제목은 이미 존재합니다. 다른 제목을 사용해주세요.");
         }
 
+        // 로컬에 저장 될 물리적인 파일명 지정
         const fileName = this.getCurrentTimeFormatted() + this.getFileExtension(fileUrl);
+
+        // 다운로드 경로 + 파일명
         const tempPath = `/home/docker/Downloads/${fileName}`;
         await this.fileDownload(fileUrl, tempPath);
 
+        // 다운로드 받은 파일을 FormData로 지정
         const form = new FormData();
         form.append("file", await fileFromPath(tempPath));
 
+        // 파일 서버에 업로드
         const response = await fetch("https://file.retrotv.me/api/upload", {
             method: "POST",
             headers: {
@@ -110,14 +119,17 @@ export default class FumoService {
 
         const json = (await response.json()) as any;
 
+        let uploadedUrl: string;
         try {
-            const uploadedUrl = json["files"][0]["url"];
-            descript = descript ?? "A cute fumo character.";
-            await this.saveFumo(title, descript, "", uploadedUrl);
+            // 파일 서버에 저장된 URL
+            uploadedUrl = json["files"][0]["url"];
         } catch (error) {
-            console.error("Error uploading fumo:", error);
-            throw new Error("후모 이미지 정보를 저장하는 중 오류가 발생했습니다.");
+            console.error(`후모 이미지 정보를 저장하는 도중 오류가 발생했습니다.\n${error}`);
+            throw new Error("후모 이미지 정보를 저장하는 도중 오류가 발생했습니다.");
         }
+
+        descript = descript ?? "A cute fumo character.";
+        await this.saveFumo(title, descript, "", uploadedUrl);
     }
 
     private async fileDownload(fileUrl: string, tempPath: string): Promise<void> {
@@ -126,7 +138,8 @@ export default class FumoService {
             const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
             await writeFile(tempPath, imageBuffer);
         } catch (error) {
-            console.error("Error downloading file:", error);
+            console.error(`파일을 다운로드 하는 도중 오류가 발생했습니다.\n${error}`);
+            throw new Error("파일을 다운로드 하는 도중 오류가 발생했습니다.");
         }
     }
 
@@ -145,27 +158,21 @@ export default class FumoService {
     }
 
     private getFileExtension(fileUrl: string): string {
-        // URL 객체를 사용하여 경로를 추출
         const url = new URL(fileUrl);
-        const filePath = url.pathname; // URL에서 경로를 가져옴
+        const filePath = url.pathname;
 
         // 마지막 점(.) 이후의 문자열을 찾아 확장자 추출
         const lastDotIndex = filePath.lastIndexOf(".");
         let fileExtension = "";
 
         if (lastDotIndex !== -1) {
-            // 확장자명과 그 뒤의 정보를 분리
             const extensionPart = filePath.substring(lastDotIndex);
-            // 확장자명만 추출 (예: .jpg?size=large -> .jpg)
-            fileExtension = extensionPart.split(/[?&]/)[0]; // 쿼리 문자열 제거
+            // 쿼리 문자열 제거
+            fileExtension = extensionPart.split(/[?&]/)[0];
         }
 
         if (!fileExtension) {
-            console.warn("No valid file extension found in the URL:", fileUrl);
-            // 필요에 따라 기본 확장자를 설정하거나 다른 처리를 할 수 있습니다.
-            // fileExtension = '.jpg'; // 기본 확장자 설정
-        } else {
-            console.log("File extension:", fileExtension); // 확장자 출력
+            throw new Error("유효한 파일 확장자가 없습니다. 이미지 URL을 확인하십시오.");
         }
 
         return fileExtension;
