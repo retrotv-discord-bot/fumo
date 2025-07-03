@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { FormData } from "formdata-node";
 import fs, { writeFile } from "fs/promises";
 import fetch, { BodyInit } from "node-fetch";
+import { fileFromPath } from "formdata-node/file-from-path";
 
 import { config } from "../../config";
 import prisma from "../config/datasource";
@@ -97,8 +98,7 @@ export default class FumoService {
         await this.fileDownload(fileUrl, tempPath);
 
         const form = new FormData();
-        const fileBuffer = await fs.readFile(tempPath);
-        form.append("file", fileBuffer, fileName);
+        form.append("file", await fileFromPath(tempPath));
 
         const response = await fetch("https://file.retrotv.me/api/upload", {
             method: "POST",
