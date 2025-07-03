@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
 import SlashCommand from "../../../templates/slash-command";
 import FumoService from "../../../services/fumo-service";
 
@@ -65,16 +65,19 @@ export default new SlashCommand({
             const descript = interaction.options.getString("descript", false);
 
             if (title === null || url === null) {
-                await interaction.reply({ content: "후모 제목과 URL은 모두 필수 값 입니다!", ephemeral: true });
+                await interaction.reply({
+                    content: "후모 제목과 URL은 모두 필수 값 입니다!",
+                    flags: MessageFlags.Ephemeral,
+                });
                 return;
             }
 
             try {
                 await fumoService.uploadFumo(title, url, descript);
-                await interaction.reply({ content: "후모 사진 업로드에 성공했습니다!", ephemeral: true });
+                await interaction.reply({ content: "후모 사진 업로드에 성공했습니다!", flags: MessageFlags.Ephemeral });
                 return;
             } catch (e: any) {
-                await interaction.reply({ content: e.message, ephemeral: true });
+                await interaction.reply({ content: e.message, flags: MessageFlags.Ephemeral });
                 return;
             }
         }

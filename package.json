@@ -1,6 +1,6 @@
 {
   "name": "fumo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Fumo! Many fumo!!!",
   "license": "Apache-2.0",
   "author": "yjj8353@gmail.com",
@@ -20,8 +20,7 @@
     "@prisma/client": "^6.7.0",
     "discord.js": "^14.19.2",
     "dotenv": "^16.5.0",
-    "form-data": "^4.0.3",
-    "ky": "^1.8.1",
+    "formdata-node": "^6.0.3",
     "node-fetch": "^3.3.2",
     "ts-node": "^10.9.2"
   },

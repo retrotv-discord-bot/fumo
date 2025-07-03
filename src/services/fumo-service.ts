@@ -1,11 +1,11 @@
+import { Buffer } from "buffer";
 import { PrismaClient } from "@prisma/client";
-import prisma from "../config/datasource";
-import FormData from "form-data";
-import fs from "fs/promises";
-import fetch from "node-fetch";
-import ky from "ky";
+import { FormData } from "formdata-node";
+import fs, { writeFile } from "fs/promises";
+import fetch, { BodyInit } from "node-fetch";
 
 import { config } from "../../config";
+import prisma from "../config/datasource";
 
 interface Fumo {
     ID: number;
@@ -98,14 +98,14 @@ export default class FumoService {
 
         const form = new FormData();
         const fileBuffer = await fs.readFile(tempPath);
-        form.append("file", fileBuffer, { filename: fileName });
+        form.append("file", fileBuffer, fileName);
 
         const response = await fetch("https://file.retrotv.me/api/upload", {
             method: "POST",
             headers: {
                 Authorization: config.FILE_API_KEY!,
             },
-            body: form,
+            body: form as unknown as BodyInit,
         });
 
         const json = (await response.json()) as any;
@@ -122,12 +122,9 @@ export default class FumoService {
 
     private async fileDownload(fileUrl: string, tempPath: string): Promise<void> {
         try {
-            const response = await ky.get(fileUrl);
-            if (!response.ok) {
-                throw new Error(`Failed to download file: ${response.statusText}`);
-            }
-            const arrayBuffer = await response.arrayBuffer();
-            await fs.writeFile(tempPath, Buffer.from(arrayBuffer));
+            const imageResponse = await fetch(fileUrl);
+            const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+            await writeFile(tempPath, imageBuffer);
         } catch (error) {
             console.error("Error downloading file:", error);
         }
