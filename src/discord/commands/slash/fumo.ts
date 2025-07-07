@@ -38,41 +38,35 @@ export default new SlashCommand({
         }
 
         const fumoService = new FumoService();
+        if (interaction.options.getString("title", false) !== null) {
+            const title = interaction.options.getString("title", false);
+            const fumo = title === null ? null : await fumoService.getFumoByTitle(title);
 
-        if (interaction.commandName === "fumo") {
-            if (interaction.options.getString("title", false)) {
-                const title = interaction.options.getString("title", false);
-                const fumo = title === null ? null : await fumoService.getFumoByTitle(title);
+            if (fumo === null) {
+                await interaction.reply("후모가 없어요!");
+                return;
+            }
 
-                if (fumo === null) {
-                    await interaction.reply("후모가 없어요!");
-                    return;
-                }
+            const embed = new EmbedBuilder().setColor("#9b59b6").setTitle(fumo.TITLE).setDescription(fumo.DESCRIPTION);
 
-                const embed = new EmbedBuilder()
-                    .setColor("#9b59b6")
-                    .setTitle(fumo.TITLE)
-                    .setDescription(fumo.DESCRIPTION);
+            if (fumo.URL !== "") {
+                embed.setImage(fumo.URL);
+                await interaction.reply({
+                    embeds: [embed],
+                });
 
-                if (fumo.URL !== "") {
-                    embed.setImage(fumo.URL);
-                    await interaction.reply({
-                        embeds: [embed],
-                    });
+                return;
+            }
 
-                    return;
-                }
+            if (fumo.FILENAME !== "") {
+                const file = new AttachmentBuilder(fumo.FILENAME);
+                embed.setImage(`attachment://${fumo.FILENAME}`);
+                await interaction.reply({
+                    embeds: [embed],
+                    files: [file],
+                });
 
-                if (fumo.FILENAME !== "") {
-                    const file = new AttachmentBuilder(fumo.FILENAME);
-                    embed.setImage(`attachment://${fumo.FILENAME}`);
-                    await interaction.reply({
-                        embeds: [embed],
-                        files: [file],
-                    });
-
-                    return;
-                }
+                return;
             }
         }
     },
@@ -85,6 +79,7 @@ export default new SlashCommand({
             return;
         }
 
+        // 제목 검색 기능 사용 시, 최소 2글자 이상 입력해야 함
         if (focusedOption.value.length < 2) {
             await interaction.respond([]);
             return;
