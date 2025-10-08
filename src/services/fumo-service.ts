@@ -48,14 +48,15 @@ export default class FumoService {
         }
 
         // 로컬에 저장 될 물리적인 파일명 지정
-        const fileName = this.getCurrentTimeFormatted() + this.getFileExtension(fileUrl);
+        const fileExtension = this.getFileExtension(fileUrl);
+        const fileName = this.getCurrentTimeFormatted() + fileExtension;
 
         // 다운로드 경로 + 파일명
         const tempPath = `/home/docker/Downloads/${fileName}`;
         await this.fileDownload(fileUrl, tempPath);
 
         // 파일 서버에 이미지 업로드
-        const uploadedUrl = await this.uploadFumoImageToFileServer(tempPath);
+        const uploadedUrl = await this.uploadFumoImageToFileServer(tempPath, `image/${fileExtension.replace(".", "")}`);
 
         descript = descript ?? "A cute fumo character.";
         await this.saveFumo(title, descript, "", uploadedUrl);
@@ -107,10 +108,10 @@ export default class FumoService {
         return fileExtension;
     }
 
-    private async uploadFumoImageToFileServer(filePath: string): Promise<string> {
+    private async uploadFumoImageToFileServer(filePath: string, type: string): Promise<string> {
         // 다운로드 받은 파일을 FormData로 지정
         const form = new FormData();
-        form.append("file", await fileFromPath(filePath));
+        form.append("file", await fileFromPath(filePath, { type }));
 
         // 파일 서버에 업로드
         const response = await fetch("https://file.retrotv.me/api/upload", {
