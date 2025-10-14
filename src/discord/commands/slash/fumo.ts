@@ -38,36 +38,37 @@ export default new SlashCommand({
         }
 
         const fumoService = new FumoService();
+        let fumo = null;
         if (interaction.options.getString("title", false) !== null) {
             const title = interaction.options.getString("title", false);
-            const fumo = title === null ? null : await fumoService.getFumoByTitle(title);
+            fumo = title === null ? null : await fumoService.getFumoByTitle(title);
+        } else {
+            fumo = await fumoService.getRandomFumo();
+        }
 
-            if (fumo === null) {
-                await interaction.reply("후모가 없어요!");
-                return;
-            }
+        if (fumo === null) {
+            await interaction.reply("후모가 없어요!");
+            return;
+        }
 
-            const embed = new EmbedBuilder().setColor("#9b59b6").setTitle(fumo.TITLE).setDescription(fumo.DESCRIPTION);
+        const embed = new EmbedBuilder().setColor("#9b59b6").setTitle(fumo.TITLE).setDescription(fumo.DESCRIPTION);
 
-            if (fumo.URL !== "") {
-                embed.setImage(fumo.URL);
-                await interaction.reply({
-                    embeds: [embed],
-                });
+        if (fumo.URL !== "") {
+            embed.setImage(fumo.URL);
+            await interaction.reply({
+                embeds: [embed],
+            });
 
-                return;
-            }
+            return;
+        }
 
-            if (fumo.FILENAME !== "") {
-                const file = new AttachmentBuilder(fumo.FILENAME);
-                embed.setImage(`attachment://${fumo.FILENAME}`);
-                await interaction.reply({
-                    embeds: [embed],
-                    files: [file],
-                });
-
-                return;
-            }
+        if (fumo.FILENAME !== "") {
+            const file = new AttachmentBuilder(fumo.FILENAME);
+            embed.setImage(`attachment://${fumo.FILENAME}`);
+            await interaction.reply({
+                embeds: [embed],
+                files: [file],
+            });
         }
     },
 
