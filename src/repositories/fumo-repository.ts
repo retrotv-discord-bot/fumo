@@ -11,31 +11,27 @@ export default class FumoRepository {
     }
 
     public async save(fumo: Fumo): Promise<void> {
-        await this.client.$transaction(async (tx) => {
-            if (fumo.ID !== undefined && fumo.ID !== null) {
-                await tx.fumo.update({
-                    where: { ID: fumo.ID },
-                    data: {
-                        TITLE: fumo.TITLE,
-                        DESCRIPTION: fumo.DESCRIPTION,
-                        FILENAME: fumo.FILENAME,
-                        URL: fumo.URL,
-                    },
-                });
-            } else {
-                await tx.fumo.create({
-                    data: {
-                        ID: undefined,
-                        TITLE: fumo.TITLE,
-                        DESCRIPTION: fumo.DESCRIPTION,
-                        FILENAME: fumo.FILENAME,
-                        URL: fumo.URL,
-                    },
-                });
-            }
-        });
-
-        this.client.$disconnect();
+        if (fumo.ID !== undefined && fumo.ID !== null) {
+            await this.client.fumo.update({
+                where: { ID: fumo.ID },
+                data: {
+                    TITLE: fumo.TITLE,
+                    DESCRIPTION: fumo.DESCRIPTION,
+                    FILENAME: fumo.FILENAME,
+                    URL: fumo.URL,
+                },
+            });
+        } else {
+            await this.client.fumo.create({
+                data: {
+                    ID: undefined,
+                    TITLE: fumo.TITLE,
+                    DESCRIPTION: fumo.DESCRIPTION,
+                    FILENAME: fumo.FILENAME,
+                    URL: fumo.URL,
+                },
+            });
+        }
     }
 
     public async findFumoByTitle(title: string): Promise<FumoEntity | null> {

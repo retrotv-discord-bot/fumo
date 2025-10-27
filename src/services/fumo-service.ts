@@ -8,18 +8,26 @@ import { config } from "../../config";
 import prisma from "../config/datasource";
 import FumoEntity from "../entities/fumo.entity";
 import FumoRepository from "../repositories/fumo-repository";
+import { PrismaClient } from "@prisma/client";
 
 export default class FumoService {
+    private readonly client: PrismaClient
     private readonly repository: FumoRepository;
 
     public constructor() {
+        this.client = prisma;
         this.repository = new FumoRepository(prisma);
     }
 
     public async saveFumo(title: string, description: string, filename?: string, url?: string): Promise<void> {
         const newFumo = new FumoEntity(title, description, filename, url);
         try {
-            await this.repository.save(newFumo);
+            await this.client.$transaction(async (tx) => {
+                const txRepository = new FumoRepository(tx as PrismaClient);
+                await txRepository.save(newFumo);
+            })
+
+            await this.client.$disconnect();
         } catch (error) {
             console.error(`데이터베이스에 저장하는 도중 오류가 발생했습니다.\n${error}`);
             throw new Error("후모를 저장하는 도중 오류가 발생했습니다!");

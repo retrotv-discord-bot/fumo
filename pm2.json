@@ -1,7 +1,7 @@
 {
   "apps": [
     {
-      "name": "Discord Bot",
+      "name": "Fumo Bot",
       "script": "index.ts",
       "interpreter": "./node_modules/.bin/ts-node",
       "instances": "1",
