@@ -26,8 +26,6 @@ export default class FumoService {
                 const txRepository = new FumoRepository(tx as PrismaClient);
                 await txRepository.save(newFumo);
             })
-
-            await this.client.$disconnect();
         } catch (error) {
             console.error(`데이터베이스에 저장하는 도중 오류가 발생했습니다.\n${error}`);
             throw new Error("후모를 저장하는 도중 오류가 발생했습니다!");
