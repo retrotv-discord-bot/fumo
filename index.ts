@@ -6,6 +6,7 @@ import PrefixCommand from "./src/templates/prefix-command";
 import { contextMenuCommands, slashCommands, prefixCommands } from "./src/discord/commands";
 import { events } from "./src/discord/events";
 import { config } from "./config";
+import prisma from "./src/config/datasource"
 
 declare global {
     // prettier-ignore
@@ -95,3 +96,15 @@ events.forEach((event) => {
 // 봇 로그인
 // Log in to the bot
 client.login(config.BOT_TOKEN);
+
+process.on("SIGINT", async () => {
+    await client.destroy();
+    await prisma.$disconnect();
+    process.exit(0);
+});
+
+process.on("SIGTERM", async () => {
+    await client.destroy();
+    await prisma.$disconnect();
+    process.exit(0);
+});
