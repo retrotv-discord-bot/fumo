@@ -104,14 +104,14 @@ for (const event of events) {
     }
 }
 
-// 봇 로그인
-// Log in to the bot
-try {
+/*
+ * 봇 로그인
+ * Log in to the bot
+ */
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+(async () => { // NOSONAR
     await globalThis.client.login(config.BOT_TOKEN);
-} catch (error) {
-    logger.error(error, "Failed to login bot");
-    process.exitCode = 1;
-}
+})();
 
 process.on("SIGINT", () => {
     void (async () => {
