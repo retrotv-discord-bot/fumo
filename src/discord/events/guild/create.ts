@@ -1,4 +1,4 @@
-import { Events } from "discord.js";
+import { Events, Guild } from "discord.js";
 
 import { deployCommands } from "../../commands/deploy-commands";
 import Event from "../../../templates/event";
@@ -10,7 +10,7 @@ import Event from "../../../templates/event";
 export default new Event({
     name: Events.GuildCreate,
     once: true,
-    async execute(guild) {
+    async execute(guild: Guild) {
         /*
          * 봇이 초대되었을 때, 해당 서버에 슬래시 명령어를 배포합니다.
          * When the bot is invited to a server, deploy slash commands to that server

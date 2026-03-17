@@ -106,9 +106,7 @@ for (const event of events) {
 
 // 봇 로그인
 // Log in to the bot
-(async () => {
-    await globalThis.client.login(config.BOT_TOKEN);
-})();
+await globalThis.client.login(config.BOT_TOKEN);
 
 process.on("SIGINT", () => {
     void (async () => {

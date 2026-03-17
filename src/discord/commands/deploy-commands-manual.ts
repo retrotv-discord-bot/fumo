@@ -19,12 +19,10 @@ const rest = new REST({ version: "10" }).setToken(config.BOT_TOKEN);
  * 슬래시/컨텍스트 메뉴 명령어를 디스코드 서버에 배포함
  * Deploy slash/context menu commands to Discord server
  */
-(async () => {
-    try {
-        await rest.put(Routes.applicationGuildCommands(config.BOT_ID, config.GUILD_ID), {
-            body: commandsData,
-        });
-    } catch (error) {
-        logger.error(error);
-    }
-})();
+try {
+    await rest.put(Routes.applicationGuildCommands(config.BOT_ID, config.GUILD_ID), {
+        body: commandsData,
+    });
+} catch (error) {
+    logger.error(error);
+}
