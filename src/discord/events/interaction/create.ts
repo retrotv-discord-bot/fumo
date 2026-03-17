@@ -5,7 +5,9 @@ import {
     Events,
     MessageFlags,
 } from "discord.js";
+
 import Event from "../../../templates/event";
+import { logger } from "../../../config/logger";
 
 /**
  * 봇이 상호작용을 수신했을 때 발생하는 이벤트
@@ -23,7 +25,7 @@ export default new Event({
             const command = client.contextMenuCommands.get(interaction.commandName);
 
             if (!command) {
-                console.error(`No command matching ${interaction.commandName} was found.`);
+                logger.error(`No command matching ${interaction.commandName} was found.`);
                 return;
             }
 
@@ -32,7 +34,7 @@ export default new Event({
                     await command.execute(interaction);
                 }
             } catch (error) {
-                console.error(error);
+                logger.error(error);
                 if (interaction.replied || interaction.deferred) {
                     await interaction.followUp({
                         content: "There was an error while executing this command!",
@@ -53,7 +55,7 @@ async function chatInputCommand(interaction: ChatInputCommandInteraction) {
     const command = client.slashCommands.get(interaction.commandName);
 
     if (!command) {
-        console.error(`No command matching ${interaction.commandName} was found.`);
+        logger.error(`No command matching ${interaction.commandName} was found.`);
         return;
     }
 
@@ -62,7 +64,7 @@ async function chatInputCommand(interaction: ChatInputCommandInteraction) {
             await command.execute(interaction);
         }
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         if (interaction.replied || interaction.deferred) {
             await interaction.followUp({
                 content: "There was an error while executing this command!",
@@ -81,7 +83,7 @@ async function autocomplete(interaction: AutocompleteInteraction) {
     const command = client.slashCommands.get(interaction.commandName);
 
     if (!command) {
-        console.error(`No command matching ${interaction.commandName} was found.`);
+        logger.error(`No command matching ${interaction.commandName} was found.`);
         return;
     }
 
@@ -90,6 +92,6 @@ async function autocomplete(interaction: AutocompleteInteraction) {
             await command.autocomplete(interaction);
         }
     } catch (error) {
-        console.error(error);
+        logger.error(error);
     }
 }

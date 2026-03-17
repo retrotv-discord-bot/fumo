@@ -1,17 +1,14 @@
-import { Buffer } from "buffer";
-import { FormData } from "formdata-node";
-import { writeFile } from "fs/promises";
-import fetch, { BodyInit } from "node-fetch";
-import { fileFromPath } from "formdata-node/file-from-path";
+import { readFile, writeFile } from "node:fs/promises";
+import { basename } from "node:path";
 
 import { config } from "../../config";
-import prisma from "../config/datasource";
+import { prisma, type PrismaExtendedClient } from "../config/datasource";
 import FumoEntity from "../entities/fumo.entity";
 import FumoRepository from "../repositories/fumo-repository";
-import { PrismaClient } from "@prisma/client";
+import { logger } from "../config/logger";
 
 export default class FumoService {
-    private readonly client: PrismaClient
+    private readonly client: PrismaExtendedClient;
     private readonly repository: FumoRepository;
 
     public constructor() {
@@ -23,24 +20,30 @@ export default class FumoService {
         const newFumo = new FumoEntity(title, description, filename, url);
         try {
             await this.client.$transaction(async (tx) => {
-                const txRepository = new FumoRepository(tx as PrismaClient);
+                const txRepository = new FumoRepository(tx as PrismaExtendedClient);
                 await txRepository.save(newFumo);
-            })
-        } catch (error) {
-            console.error(`데이터베이스에 저장하는 도중 오류가 발생했습니다.\n${error}`);
-            throw new Error("후모를 저장하는 도중 오류가 발생했습니다!");
+            });
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(`데이터베이스에 저장하는 도중 오류가 발생했습니다.\n${error.message}`);
+            }
+
+            throw new Error(
+                "후모를 저장하는 도중 오류가 발생했습니다!",
+                error instanceof Error ? { cause: error } : undefined,
+            );
         }
     }
 
     public async getFumoByTitle(title: string): Promise<FumoEntity | null> {
         const fumo = await this.repository.findFumoByTitle(title);
-        console.log(`후모 검색 결과: ${fumo ? fumo.TITLE : "없음"}`);
+        logger.debug(`후모 검색 결과: ${fumo ? fumo.TITLE : "없음"}`);
         return fumo;
     }
 
     public async getFumoTitles(title: string): Promise<string[] | null> {
         const fumoTitles = await this.repository.findFumoTitles(title);
-        console.log(`검색된 후모 제목 결과: ${fumoTitles ? fumoTitles.join(", ") : "없음"}`);
+        logger.debug(`검색된 후모 제목 결과: ${fumoTitles ? fumoTitles.join(", ") : "없음"}`);
         return fumoTitles;
     }
 
@@ -58,7 +61,7 @@ export default class FumoService {
         const fileName = this.getCurrentTimeFormatted() + fileExtension;
 
         // 다운로드 경로 + 파일명
-        const tempPath = `/home/docker/Downloads/${fileName}`;
+        const tempPath = `/home/retrotv/fumoImages/${fileName}`;
         await this.fileDownload(fileUrl, tempPath);
 
         // 파일 서버에 이미지 업로드
@@ -71,11 +74,21 @@ export default class FumoService {
     private async fileDownload(fileUrl: string, tempPath: string): Promise<void> {
         try {
             const imageResponse = await fetch(fileUrl);
-            const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+            if (!imageResponse.ok) {
+                throw new Error(`이미지 다운로드 실패: ${imageResponse.status}`);
+            }
+
+            const imageBuffer = new Uint8Array(await imageResponse.arrayBuffer());
             await writeFile(tempPath, imageBuffer);
-        } catch (error) {
-            console.error(`파일을 다운로드 하는 도중 오류가 발생했습니다.\n${error}`);
-            throw new Error("파일을 다운로드 하는 도중 오류가 발생했습니다.");
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(`파일을 다운로드 하는 도중 오류가 발생했습니다.\n${error.message}`);
+            }
+
+            throw new Error(
+                "파일을 다운로드 하는 도중 오류가 발생했습니다.",
+                error instanceof Error ? { cause: error } : undefined,
+            );
         }
     }
 
@@ -103,8 +116,9 @@ export default class FumoService {
 
         if (lastDotIndex !== -1) {
             const extensionPart = filePath.substring(lastDotIndex);
+
             // 쿼리 문자열 제거
-            fileExtension = extensionPart.split(/[?&]/)[0];
+            fileExtension = extensionPart.split(/[?&]/)[0] ?? "";
         }
 
         if (!fileExtension) {
@@ -116,8 +130,10 @@ export default class FumoService {
 
     private async uploadFumoImageToFileServer(filePath: string, type: string): Promise<string> {
         // 다운로드 받은 파일을 FormData로 지정
+        const fileBuffer = await readFile(filePath);
+        const fileBlob = new Blob([fileBuffer], { type });
         const form = new FormData();
-        form.append("file", await fileFromPath(filePath, { type }));
+        form.append("file", fileBlob, basename(filePath));
 
         // 파일 서버에 업로드
         const response = await fetch("https://file.retrotv.me/api/upload", {
@@ -125,20 +141,53 @@ export default class FumoService {
             headers: {
                 Authorization: config.FILE_API_KEY!,
             },
-            body: form as unknown as BodyInit,
+            body: form,
         });
 
-        const json = (await response.json()) as any;
-
-        let uploadedUrl: string;
-        try {
-            // 파일 서버에 저장된 URL
-            uploadedUrl = json["files"][0]["url"];
-        } catch (error) {
-            console.error(`후모 이미지 정보를 저장하는 도중 오류가 발생했습니다.\n${error}`);
-            throw new Error("후모 이미지 정보를 저장하는 도중 오류가 발생했습니다.");
+        if (!response.ok) {
+            throw new Error(`파일 서버 업로드 실패: ${response.status}`);
         }
 
-        return uploadedUrl;
+        const json: unknown = await response.json();
+
+        try {
+            return this.extractUploadedUrl(json);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                logger.error(`후모 이미지 정보를 저장하는 도중 오류가 발생했습니다.\n${error.message}`);
+            }
+
+            throw new Error(
+                "후모 이미지 정보를 저장하는 도중 오류가 발생했습니다.",
+                error instanceof Error ? { cause: error } : undefined,
+            );
+        }
+    }
+
+    private extractUploadedUrl(payload: unknown): string {
+        if (typeof payload !== "object" || payload === null) {
+            throw new Error("파일 업로드 응답 형식이 올바르지 않습니다.");
+        }
+
+        const response = payload as { files?: unknown };
+        if (!this.isUnknownArray(response.files) || response.files.length === 0) {
+            throw new Error("업로드 결과에 파일 정보가 없습니다.");
+        }
+
+        const firstFile = response.files[0];
+        if (typeof firstFile !== "object" || firstFile === null) {
+            throw new Error("업로드 파일 정보 형식이 올바르지 않습니다.");
+        }
+
+        const file = firstFile as { url?: unknown };
+        if (typeof file.url !== "string" || file.url.length === 0) {
+            throw new Error("업로드 URL을 찾을 수 없습니다.");
+        }
+
+        return file.url;
+    }
+
+    private isUnknownArray(value: unknown): value is unknown[] {
+        return Array.isArray(value);
     }
 }

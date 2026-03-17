@@ -3,8 +3,10 @@
  * This script is used by the bot administrator to manually deploy slash/context menu commands
  */
 import { REST, Routes } from "discord.js";
+
 import { config } from "../../../config";
 import { contextMenuCommands, slashCommands } from ".";
+import { logger } from "../../config/logger";
 
 const commandsData = [
     ...Object.values(slashCommands).map((command) => command.data),
@@ -23,6 +25,6 @@ const rest = new REST({ version: "10" }).setToken(config.BOT_TOKEN);
             body: commandsData,
         });
     } catch (error) {
-        console.error(error);
+        logger.error(error);
     }
 })();

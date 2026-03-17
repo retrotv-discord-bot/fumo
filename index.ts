@@ -6,7 +6,8 @@ import PrefixCommand from "./src/templates/prefix-command";
 import { contextMenuCommands, slashCommands, prefixCommands } from "./src/discord/commands";
 import { events } from "./src/discord/events";
 import { config } from "./config";
-import prisma from "./src/config/datasource"
+import { prisma } from "./src/config/datasource";
+import { logger } from "./src/config/logger";
 
 declare global {
     // prettier-ignore
@@ -17,7 +18,7 @@ declare global {
     };
 }
 
-global.client = Object.assign(
+globalThis.client = Object.assign(
     new Client({
         intents: [
             /*
@@ -68,43 +69,61 @@ global.client = Object.assign(
 // 컨텍스트 메뉴 명령어 불러오기
 // Load context menu commands
 contextMenuCommands.forEach((command) => {
-    global.client.contextMenuCommands.set(command.data.name, command);
+    globalThis.client.contextMenuCommands.set(command.data.name, command);
 });
 
 // 슬래시 명령어 불러오기
 // Load slash commands
 slashCommands.forEach((command) => {
-    global.client.slashCommands.set(command.data.name, command);
+    globalThis.client.slashCommands.set(command.data.name, command);
 });
 
 // prefix 명령어 불러오기
 // Load prefix commands
 prefixCommands.forEach((command) => {
-    global.client.prefixCommands.set(command.name, command);
+    globalThis.client.prefixCommands.set(command.name, command);
 });
 
 // 이벤트 불러오기
 // Load events
-events.forEach((event) => {
+for (const event of events) {
     if (event.once) {
-        client.once(event.name, (...args) => event.execute(...args));
+        globalThis.client.once(event.name, (...args) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            Promise.resolve(event.execute(...args)).catch((err) => {
+                logger.error(err, `Error in event: ${event.name}`);
+            });
+        });
     } else {
-        client.on(event.name, (...args) => event.execute(...args));
+        globalThis.client.on(event.name, (...args) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            Promise.resolve(event.execute(...args)).catch((err) => {
+                logger.error(err, `Error in event: ${event.name}`);
+            });
+        });
     }
-});
+}
 
 // 봇 로그인
 // Log in to the bot
-client.login(config.BOT_TOKEN);
+await globalThis.client.login(config.BOT_TOKEN);
 
-process.on("SIGINT", async () => {
-    await client.destroy();
-    await prisma.$disconnect();
-    process.exit(0);
+process.on("SIGINT", () => {
+    void (async () => {
+        await globalThis.client.destroy();
+        await prisma.$disconnect();
+
+        // eslint-disable-next-line n/no-process-exit
+        process.exit(0);
+    })();
 });
 
-process.on("SIGTERM", async () => {
-    await client.destroy();
-    await prisma.$disconnect();
-    process.exit(0);
+process.on("SIGTERM", () => {
+    void (async () => {
+        await globalThis.client.destroy();
+        await prisma.$disconnect();
+
+        // eslint-disable-next-line n/no-process-exit
+        process.exit(0);
+    })();
 });

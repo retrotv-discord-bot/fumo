@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
 import SlashCommand from "../../../templates/slash-command";
 import FumoService from "../../../services/fumo-service";
+import { logger } from "../../../config/logger";
 
 export default new SlashCommand({
     data: new SlashCommandBuilder()
@@ -76,8 +77,16 @@ export default new SlashCommand({
                 await fumoService.uploadFumo(title, url, descript);
                 await interaction.reply({ content: "후모 사진 업로드에 성공했습니다!", flags: MessageFlags.Ephemeral });
                 return;
-            } catch (e: any) {
-                await interaction.reply({ content: e.message, flags: MessageFlags.Ephemeral });
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    logger.error(`후모 사진 업로드에 실패했습니다.\n${error.message}`);
+                }
+
+                await interaction.reply({
+                    content: "후모 사진 업로드에 실패했습니다. 다시 시도해주세요.",
+                    flags: MessageFlags.Ephemeral,
+                });
+
                 return;
             }
         }

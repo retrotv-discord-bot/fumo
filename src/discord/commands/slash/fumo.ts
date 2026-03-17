@@ -7,6 +7,9 @@ import {
 } from "discord.js";
 import SlashCommand from "../../../templates/slash-command";
 import FumoService from "../../../services/fumo-service";
+import type FumoEntity from "../../../entities/fumo.entity";
+
+const fumoService = new FumoService();
 
 export default new SlashCommand({
     data: new SlashCommandBuilder()
@@ -37,11 +40,10 @@ export default new SlashCommand({
             return;
         }
 
-        const fumoService = new FumoService();
-        let fumo = null;
-        if (interaction.options.getString("title", false) !== null) {
-            const title = interaction.options.getString("title", false);
-            fumo = title === null ? null : await fumoService.getFumoByTitle(title);
+        let fumo: FumoEntity | null;
+        const title = interaction.options.getString("title", false);
+        if (title) {
+            fumo = await fumoService.getFumoByTitle(title);
         } else {
             fumo = await fumoService.getRandomFumo();
         }
@@ -73,8 +75,6 @@ export default new SlashCommand({
     },
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
-        const fumoService = new FumoService();
-
         const focusedOption = interaction.options.getFocused(true);
         if (focusedOption.name !== "title") {
             return;

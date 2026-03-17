@@ -1,30 +1,33 @@
-import { PrismaClient } from "@prisma/client";
+import "dotenv/config";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 
-const prisma = new PrismaClient({
+import { PrismaClient } from "../../generated/prisma/client";
+import { logger } from "./logger";
+
+const adapter = new PrismaLibSql({
+    url: process.env.DATABASE_URL ?? "",
+});
+const prismaClient = new PrismaClient({
+    adapter,
     log: [
-        {
-            emit: "event",
-            level: "query", // 쿼리 로그를 출력
-        },
-        {
-            emit: "event",
-            level: "info", // 정보 로그를 출력
-        },
-        {
-            emit: "event",
-            level: "warn", // 경고 로그를 출력
-        },
-        {
-            emit: "event",
-            level: "error", // 오류 로그를 출력
-        },
+        { emit: "stdout", level: "info" },
+        { emit: "stdout", level: "warn" },
+        { emit: "stdout", level: "error" },
     ],
 });
 
-prisma.$on("query", (e) => {
-    console.log(`Query: ${e.query}`);
-    console.log(`Params: ${e.params}`);
-    console.log(`Duration: ${e.duration}ms`);
+export const prisma = prismaClient.$extends({
+    query: {
+        async $allOperations({ operation, model, args, query }) {
+            const start = performance.now();
+            const result: unknown = await query(args);
+            const duration = performance.now() - start;
+
+            logger.debug({ model, operation, duration: `${duration.toFixed(2)}ms` }, "prisma query");
+
+            return result;
+        },
+    },
 });
 
-export default prisma;
+export type PrismaExtendedClient = typeof prisma;

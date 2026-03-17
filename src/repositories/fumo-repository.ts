@@ -1,12 +1,11 @@
-import { PrismaClient } from "@prisma/client";
-
 import FumoEntity from "../entities/fumo.entity";
-import Fumo from "../entities/fumo";
+import type Fumo from "../entities/fumo";
+import type { PrismaExtendedClient } from "../config/datasource";
 
 export default class FumoRepository {
-    private readonly client: PrismaClient;
+    private readonly client: PrismaExtendedClient;
 
-    public constructor(client: PrismaClient) {
+    public constructor(client: PrismaExtendedClient) {
         this.client = client;
     }
 

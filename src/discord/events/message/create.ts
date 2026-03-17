@@ -1,7 +1,9 @@
 import { Events, Message } from "discord.js";
+
 import Event from "../../../templates/event";
 import { config } from "../../../../config";
 import PrefixCommand from "../../../templates/prefix-command";
+import { logger } from "../../../config/logger";
 
 /**
  * 봇이 메시지를 수신했을 때 발생하는 이벤트
@@ -19,8 +21,7 @@ export default new Event({
         }
 
         const args = message.content.slice(config.PREFIX.length).trim().split(/ +/);
-        const commandName = (<string>args.shift()).toLowerCase();
-
+        const commandName = (args.shift() ?? "").toLowerCase();
         const command =
             (client.prefixCommands.get(commandName) as PrefixCommand) ||
             (client.prefixCommands.find((cmd: PrefixCommand): boolean =>
@@ -34,7 +35,7 @@ export default new Event({
         try {
             await command.execute(message, args);
         } catch (error) {
-            console.error(error);
+            logger.error(error);
         }
     },
 });
