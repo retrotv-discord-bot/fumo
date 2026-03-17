@@ -1,4 +1,4 @@
-# fumo-new
+# fumo
 
 To install dependencies:
 
