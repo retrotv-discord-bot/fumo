@@ -1,4 +1,4 @@
-import Fumo from "./fumo";
+import type Fumo from "./fumo";
 
 export default class FumoEntity implements Fumo {
     ID?: number;
