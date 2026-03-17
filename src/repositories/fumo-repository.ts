@@ -65,7 +65,7 @@ export default class FumoRepository {
     }
 
     public async findRandomFumo(): Promise<FumoEntity | null> {
-        const count = await this.client.fumo.count();
+        const count = await this.client.fumo.count({});
         if (count === 0) {
             return null;
         }
