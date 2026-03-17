@@ -106,7 +106,12 @@ for (const event of events) {
 
 // 봇 로그인
 // Log in to the bot
-await globalThis.client.login(config.BOT_TOKEN);
+try {
+    await globalThis.client.login(config.BOT_TOKEN);
+} catch (error) {
+    logger.error(error, "Failed to login bot");
+    process.exitCode = 1;
+}
 
 process.on("SIGINT", () => {
     void (async () => {
