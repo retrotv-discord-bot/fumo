@@ -18,7 +18,6 @@ export default defineConfig(
         projectService: true,
       },
       globals: {
-        ...globals.bun,
         ...globals.node,
       },
     },
