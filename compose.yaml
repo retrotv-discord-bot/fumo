@@ -1,0 +1,28 @@
+# podman-compose 가 pod 를 만들지 않도록 설정 (pod 와 userns_mode 는 함께 쓸 수 없음)
+x-podman:
+  in_pod: false
+
+services:
+  bot:
+    build: .
+    image: fumo
+    container_name: fumo
+    # always: 재부팅 시 podman-restart.service 가 이 컨테이너를 자동으로 시작
+    # (podman-restart.service 는 restart 정책이 always 인 컨테이너만 시작함)
+    restart: always
+
+    # BOT_TOKEN, APPLICATION_ID, GUILD_ID, DATABASE_URL 을 .env 에서 전달
+    # DATABASE_URL 은 컨테이너 경로로 지정: file:/data/fishing-vessel.db
+    env_file: .env
+
+    # 종료 시 npm run stop 이 끝날 때까지 기다리는 시간
+    stop_grace_period: 30s
+
+    volumes:
+      # 호스트 디렉터리 -> 컨테이너 /data (DB 파일 저장 위치)
+      # 실행 전에 호스트 디렉터리를 만들어 두세요: mkdir -p ~/podman-volume/fishing-vessel
+      - ${HOME}/podman-volume/fumo:/data:Z
+
+    # rootless podman: 호스트 사용자를 컨테이너의 node 사용자(1000)로 매핑해
+    # 호스트에서 DB 파일 소유자가 본인 계정이 되도록 함 (podman 4.3 이상)
+    userns_mode: "keep-id:uid=1000,gid=1000"
