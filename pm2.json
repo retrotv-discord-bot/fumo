@@ -1,14 +1,22 @@
 {
   "apps": [
     {
-      "name": "Discord Bot",
+      "name": "Fumo",
       "script": "index.ts",
       "interpreter": "./node_modules/.bin/ts-node",
       "instances": 1,
       "exec_mode": "fork",
       "watch": [ "src", "index.ts" ],
       "auto_restart": true,
-      "ignore_watch": [ "node_modules" ]
+      "ignore_watch": [ "node_modules" ],
+      "env": {
+        "NODE_ENV": "prod",
+        "LOG_LEVEL": "info"
+      },
+      "env_debug": {
+        "NODE_ENV": "prod",
+        "LOG_LEVEL": "debug"
+      }
     }
   ]
 }
