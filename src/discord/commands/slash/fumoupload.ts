@@ -61,6 +61,7 @@ export default new SlashCommand({
         const fumoService = new FumoService();
 
         if (interaction.commandName === "fumoupload") {
+            const userId = interaction.user.id;
             const title = interaction.options.getString("title", false);
             const url = interaction.options.getString("url", false);
             const descript = interaction.options.getString("descript", false);
@@ -74,7 +75,7 @@ export default new SlashCommand({
             }
 
             try {
-                await fumoService.uploadFumo(title, url, descript);
+                await fumoService.uploadFumo(title, url, userId, descript);
                 await interaction.reply({ content: "후모 사진 업로드에 성공했습니다!", flags: MessageFlags.Ephemeral });
                 return;
             } catch (error: unknown) {

@@ -20,4 +20,5 @@ model Fumo {
   DESCRIPTION String @default("A cute fumo character.")
   FILENAME    String @default("")
   URL         String @default("")
+  UPLOADER_ID String
 }

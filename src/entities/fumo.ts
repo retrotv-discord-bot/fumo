@@ -4,4 +4,5 @@ export default interface Fumo {
     DESCRIPTION: string;
     FILENAME: string;
     URL: string;
+    UPLOADER_ID: string;
 }

@@ -6,12 +6,14 @@ export default class FumoEntity implements Fumo {
     DESCRIPTION: string;
     FILENAME: string;
     URL: string;
+    UPLOADER_ID: string;
 
-    constructor(title: string, description: string, filename?: string, url?: string, id?: number) {
+    constructor(title: string, description: string, userId: string, filename?: string, url?: string, id?: number) {
         this.TITLE = title;
         this.DESCRIPTION = description;
         this.FILENAME = filename ?? "";
         this.URL = url ?? "";
         this.ID = id;
+        this.UPLOADER_ID = userId;
     }
 }

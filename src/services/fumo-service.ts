@@ -19,8 +19,14 @@ export default class FumoService {
         this.repository = new FumoRepository(prisma);
     }
 
-    public async saveFumo(title: string, description: string, filename?: string, url?: string): Promise<void> {
-        const newFumo = new FumoEntity(title, description, filename, url);
+    public async saveFumo(
+        title: string,
+        description: string,
+        userId: string,
+        filename?: string,
+        url?: string,
+    ): Promise<void> {
+        const newFumo = new FumoEntity(title, description, userId, filename, url);
         try {
             await this.client.$transaction(async (tx: TransactionClient) => {
                 const txRepository = new FumoRepository(tx);
@@ -51,7 +57,7 @@ export default class FumoService {
         return await this.repository.findRandomFumo();
     }
 
-    public async uploadFumo(title: string, fileUrl: string, descript: string | null): Promise<void> {
+    public async uploadFumo(title: string, fileUrl: string, userId: string, descript: string | null): Promise<void> {
         if (await this.repository.checkDuplicateFumo(title)) {
             throw new Error("해당하는 제목은 이미 존재합니다. 다른 제목을 사용해주세요.");
         }
@@ -74,7 +80,7 @@ export default class FumoService {
         }
 
         descript = descript ?? "A cute fumo character.";
-        await this.saveFumo(title, descript, "", uploadedUrl);
+        await this.saveFumo(title, descript, userId, "", uploadedUrl);
     }
 
     private async fileDownload(fileUrl: string, tempPath: string): Promise<void> {
