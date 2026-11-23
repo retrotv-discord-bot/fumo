@@ -1,5 +1,5 @@
-import { readFile, writeFile } from "node:fs/promises";
-import { basename } from "node:path";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { basename, dirname } from "node:path";
 
 import { config } from "../../config";
 import FumoEntity from "../entities/fumo.entity";
@@ -31,10 +31,7 @@ export default class FumoService {
                 logger.error(`데이터베이스에 저장하는 도중 오류가 발생했습니다.\n${error.message}`);
             }
 
-            throw new Error(
-                "후모를 저장하는 도중 오류가 발생했습니다!",
-                { cause: error },
-            );
+            throw new Error("후모를 저장하는 도중 오류가 발생했습니다!", { cause: error });
         }
     }
 
@@ -64,11 +61,17 @@ export default class FumoService {
         const fileName = this.getCurrentTimeFormatted() + fileExtension;
 
         // 다운로드 경로 + 파일명
-        const tempPath = `/home/retrotv/fumoImages/${fileName}`;
-        await this.fileDownload(fileUrl, tempPath);
+        const tempPath = `/data/fumoImages/${fileName}`;
+        let uploadedUrl: string;
+        try {
+            await this.fileDownload(fileUrl, tempPath);
 
-        // 파일 서버에 이미지 업로드
-        const uploadedUrl = await this.uploadFumoImageToFileServer(tempPath, `image/${fileExtension.replace(".", "")}`);
+            // 파일 서버에 이미지 업로드
+            uploadedUrl = await this.uploadFumoImageToFileServer(tempPath, `image/${fileExtension.replace(".", "")}`);
+        } finally {
+            // 업로드 성공/실패와 관계없이 임시 파일 삭제
+            await rm(tempPath, { force: true });
+        }
 
         descript = descript ?? "A cute fumo character.";
         await this.saveFumo(title, descript, "", uploadedUrl);
@@ -82,16 +85,14 @@ export default class FumoService {
             }
 
             const imageBuffer = new Uint8Array(await imageResponse.arrayBuffer());
+            await mkdir(dirname(tempPath), { recursive: true });
             await writeFile(tempPath, imageBuffer);
         } catch (error: unknown) {
             if (error instanceof Error) {
                 logger.error(`파일을 다운로드 하는 도중 오류가 발생했습니다.\n${error.message}`);
             }
 
-            throw new Error(
-                "파일을 다운로드 하는 도중 오류가 발생했습니다.",
-                { cause: error },
-            );
+            throw new Error("파일을 다운로드 하는 도중 오류가 발생했습니다.", { cause: error });
         }
     }
 
@@ -160,10 +161,7 @@ export default class FumoService {
                 logger.error(`후모 이미지 정보를 저장하는 도중 오류가 발생했습니다.\n${error.message}`);
             }
 
-            throw new Error(
-                "후모 이미지 정보를 저장하는 도중 오류가 발생했습니다.",
-                { cause: error },
-            );
+            throw new Error("후모 이미지 정보를 저장하는 도중 오류가 발생했습니다.", { cause: error });
         }
     }
 
